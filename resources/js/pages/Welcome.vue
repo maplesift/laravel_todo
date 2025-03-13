@@ -1,19 +1,43 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link ,useForm,router} from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
+import axios from 'axios';
 
-const event = ref('請輸入待辦事項');
-const events = reactive(new Array());
+const props=defineProps({
+    events:Array,
+});
+
+const event = ref('');
+// const events = reactive(new Array());
 let editText=ref('')
+
+const createEvent=useForm({
+    event:'',
+});
+
+
 const showInput=reactive(new Array())
-const addEvent = () => {
-    events.push(event.value);
-    event.value = '';
-    console.log(events);
-    showInput.push(false)
-    console.log(showInput);
-    
-}
+const addEvent=()=>{
+    createEvent.event=event.value;
+    createEvent.post('http://localhost/Laravel/laravel_todo/public/event',{
+        onSuccess:()=>{
+            event.value='';
+        }
+    });
+
+    //  events.push(event.value);
+    //  event.value='';
+    //  showInput.push(false);
+    //  axios.post('/event',{event:event.value})
+    //  .then((res)=>{
+    //      events.push(event.value);
+    //      event.value='';
+    //      showInput.push(false);    
+    //      console.log(res.data);
+    //  }).catch(err=>console.log(err));
+     
+    // console.log(showInput);
+ }
 const save=(idx)=>{
     //events.splice(idx,1,editText.value);
     events[idx]=editText.value;
@@ -28,8 +52,12 @@ const edit=(idx)=>{
     //events.splice(idx,1,editText.value);
     //editText.value='';
 }
-const del=(idx)=>{
-    events.splice(idx,1);
+const del=(id)=>{
+    axios.delete(`http://localhost/Laravel/laravel_todo/public/event/${id}`)
+    .then((res)=>{
+        //console.log(res.data);
+        router.reload();
+    }).catch(err=>console.log(err));
 }
 
 </script>
@@ -73,7 +101,7 @@ const del=(idx)=>{
                 <div id="lists" class="w-full">
                     <div v-for="event,idx in events" :key="idx" class="flex justify-between w-full" >
                         <div v-if="!showInput[idx]" >
-                            {{ idx+1 }}.{{ event }}
+                            {{ idx+1 }}.{{ event.event }}
                         </div>
                         <div v-else="showInput[idx]">
                             <input type="text" v-model="editText" class="border border-gary">
@@ -81,7 +109,7 @@ const del=(idx)=>{
                         <div>
                             <button class="btn btn-yellow" v-if="!showInput[idx]" @click="edit(idx)">編輯</button>
                             <button class="btn btn-blue" v-if="showInput[idx]" @click="save(idx)">更新</button>
-                            <button class="btn btn-red" @click="del(idx)">刪除</button>
+                            <button class="btn btn-red" @click="del(event.id)">刪除</button>
                         </div>
                     </div>
                 </div>
