@@ -4,10 +4,29 @@ import { ref, reactive } from 'vue';
 
 const event = ref('請輸入待辦事項');
 const events = reactive(new Array());
+let editText=ref('')
+const showInput=reactive(new Array())
 const addEvent = () => {
     events.push(event.value);
     event.value = '';
     console.log(events);
+    showInput.push(false)
+    console.log(showInput);
+    
+}
+const save=(idx)=>{
+    //events.splice(idx,1,editText.value);
+    events[idx]=editText.value;
+    editText.value='';
+    showInput.fill(false);
+}
+const edit=(idx)=>{
+    editText.value=events[idx];
+    showInput.fill(false);
+    showInput[idx]=true;
+    //console.log(showInput);
+    //events.splice(idx,1,editText.value);
+    //editText.value='';
 }
 const del=(idx)=>{
     events.splice(idx,1);
@@ -17,7 +36,7 @@ const del=(idx)=>{
 
 <template>
 
-    <Head title="Welcome">
+    <Head title="代辦事項">
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     </Head>
@@ -52,16 +71,19 @@ const del=(idx)=>{
                 </div>
                 <h3 class="text-center w-full text-2xl">待辦事項清單</h3>
                 <div id="lists" class="w-full">
-                    <p v-for="event,idx in events" :key="idx" class="flex justify-between w-full" >
-                        <div>
-
+                    <div v-for="event,idx in events" :key="idx" class="flex justify-between w-full" >
+                        <div v-if="!showInput[idx]" >
                             {{ idx+1 }}.{{ event }}
                         </div>
+                        <div v-else="showInput[idx]">
+                            <input type="text" v-model="editText" class="border border-gary">
+                        </div>
                         <div>
-                            <button class="btn btn-yellow">編輯</button>
+                            <button class="btn btn-yellow" v-if="!showInput[idx]" @click="edit(idx)">編輯</button>
+                            <button class="btn btn-blue" v-if="showInput[idx]" @click="save(idx)">更新</button>
                             <button class="btn btn-red" @click="del(idx)">刪除</button>
                         </div>
-                    </p>
+                    </div>
                 </div>
             </main>
         </div>
@@ -80,5 +102,8 @@ const del=(idx)=>{
 }
 .btn-red{
     @apply bg-red-200 text-red-800
+}
+.btn-blue{
+    @apply bg-blue-200 text-blue-800
 }
 </style>
