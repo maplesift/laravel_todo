@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { Head, Link ,useForm,router} from '@inertiajs/vue3';
 import { ref, reactive , onBeforeMount } from 'vue';
-import axios from 'axios';
-
+import Event from '@/pages/Event.vue';
 const props=defineProps({
     events:Array,
 });
-
 const event=ref('');
-//const events=reactive(new Array());
-//let editText=ref('');
-
 const createEvent=useForm({
     event:'',
 });
-const editEvent=useForm({
-    event:'',
-});
-
-const showInput=reactive(new Array())
 
 const addEvent=()=>{
     createEvent.event=event.value;
@@ -28,63 +18,7 @@ const addEvent=()=>{
         }
     });
 
-    //  events.push(event.value);
-    //  event.value='';
-    //  showInput.push(false);
-    //  axios.post('/event',{event:event.value})
-    //  .then((res)=>{
-    //      events.push(event.value);
-    //      event.value='';
-    //      showInput.push(false);    
-    //      console.log(res.data);
-    //  }).catch(err=>console.log(err));
-     
-    // console.log(showInput);
  }
-/**
- * 使用patch方法更新資料
- * @param id 
- */
- const save=(id)=>{
-    //events.splice(idx,1,editText.value);
-    editEvent.patch(`http://localhost/Laravel/laravel_todo/public/event/${id}`,{
-        onSuccess:()=>{
-            router.reload();
-            showInput.fill(false);
-        }
-    });
-
-}
-
-/**
- * 編輯事件，顯示輸入框
- * @param idx 
- */ 
- const edit=(idx)=>{
-    editEvent.event=props.events[idx].event;
-    showInput.fill(false);
-    showInput[idx]=true;
-    //console.log(showInput);
-    //events.splice(idx,1,editText.value);
-    //editText.value='';
-}
-const del=(id)=>{
-    axios.delete(`http://localhost/Laravel/laravel_todo/public/event/${id}`)
-    .then((res)=>{
-        //console.log(res.data);
-        router.reload();
-    }).catch(err=>console.log(err));
-}
-
-/**
- * 使用onBeforeMount()生命週期hooks，初始化showInput陣列
- */
- onBeforeMount(()=>{
-    props.events.forEach((event,idx)=>{
-        showInput.push(false);
-    });
-    //console.log(showInput);
-});
 </script>
 
 <template>
@@ -124,19 +58,11 @@ const del=(id)=>{
                 </div>
                 <h3 class="text-center w-full text-2xl">待辦事項清單</h3>
                 <div id="lists" class="w-full">
-                    <div v-for="event,idx in events" :key="idx" class="flex justify-between w-full" >
-                        <div v-if="!showInput[idx]" >
-                            {{ idx+1 }}.{{ event.event }}
-                        </div>
-                        <div v-else="showInput[idx]">
-                            <input type="text" v-model="editEvent.event" class="border border-gary">
-                        </div>
-                        <div>
-                            <button class="btn btn-yellow" v-if="!showInput[idx]" @click="edit(idx)">編輯</button>
-                            <button class="btn btn-blue" v-if="showInput[idx]" @click="save(event.id)">更新</button>
-                            <button class="btn btn-red" @click="del(event.id)">刪除</button>
-                        </div>
-                    </div>
+                    <Event v-for="event,idx in props.events" 
+                        :key="idx" 
+                        :idx="idx"  
+                        :event="event" 
+                        @del="del"/>
                 </div>
             </main>
         </div>
@@ -150,13 +76,5 @@ const del=(id)=>{
 .btn-lime{
     @apply bg-lime-200 text-lime-800
 }
-.btn-yellow{
-    @apply bg-yellow-800 text-yellow-100
-}
-.btn-red{
-    @apply bg-red-200 text-red-800
-}
-.btn-blue{
-    @apply bg-blue-200 text-blue-800
-}
+
 </style>
